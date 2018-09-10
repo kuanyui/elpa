@@ -8658,8 +8658,8 @@ See URL `https://pugjs.org/'."
           (one-or-more
            (zero-or-more not-newline) "|"
            (zero-or-more not-newline) "\n") (zero-or-more not-newline) "\n"
-           (message) line-end))
-  :modes pug-mode)
+          (message) line-end))
+  :modes (yajade-mode jade-mode pug-mode))
 
 (flycheck-define-checker puppet-parser
   "A Puppet DSL syntax checker using puppet's own parser.
