@@ -14,3 +14,5 @@ emacs-config.el
 *.pyc
 archives/
 *readme.txt
+gnupg/
+/archives/*/archive-contents.signed
