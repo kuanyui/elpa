@@ -1,0 +1,321 @@
+:experimental:
+:highlighter: coderay
+:melpa-badge: http://melpa.org/packages/adoc-mode-badge.svg
+:melpa-stable-badge: http://stable.melpa.org/packages/adoc-mode-badge.svg
+:melpa-package: http://melpa.org/#/adoc-mode
+:melpa-stable-package: http://stable.melpa.org/#/adoc-mode
+:nongnu-elpa-badge: https://elpa.nongnu.org/nongnu/adoc-mode.svg
+:nongnu-elpa-package: https://elpa.nongnu.org/nongnu/adoc-mode.html
+:license-badge: https://img.shields.io/badge/license-GPL_3-green.svg
+:copying: http://www.gnu.org/copyleft/gpl.html
+
+
+image:https://github.com/bbatsov/adoc-mode/workflows/CI/badge.svg[link="https://github.com/bbatsov/adoc-mode/actions?query=workflow%3ACI"]
+image:{nongnu-elpa-badge}[link="{nongnu-elpa-package}"]
+image:{melpa-badge}[link="{melpa-package}"]
+image:{melpa-stable-badge}[link="{melpa-stable-package}"]
+image:{license-badge}[link="{copying}"]
+
+= adoc-mode
+
+== Introduction
+
+https://asciidoc.org/[AsciiDoc] is a text document format for
+writing short documents, articles, books and UNIX man pages. AsciiDoc files
+can be translated to HTML and DocBook markups.
+
+`adoc-mode` is an Emacs major mode for editing AsciiDoc files. It emphasizes
+the idea that the document is highlighted so it pretty much looks like the
+final output. What must be bold is bold, what must be italic is italic etc.
+Meta characters are naturally still visible, but in a faint way, so they can
+be easily ignored.
+
+== Features
+
+Here are some of the main features of `adoc-mode`:
+
+- comprehensive syntax highlighting for all AsciiDoc elements
+- native fontification of source code blocks using language-appropriate major modes
+- font-lock support for Asciidoctor inline macros (`kbd:[]`, `btn:[]`, `menu:[]`, etc.)
+- inline image preview with right-click context menus and remote image support
+- ~50 tempo templates for inserting AsciiDoc markup (formatting, titles, blocks, lists, macros, etc.)
+- title management: promote / demote, toggle between one-line and two-line styles, adjust underline length
+- navigate to anchors (`C-c C-a`) and follow URLs, `include::` macros, and xrefs at point (`C-c C-o` / `M-.`)
+- nested `imenu` index with hierarchical heading structure
+- support for `outline-mode` (one-line title style only)
+- integration with `flyspell-mode` (skips non-prose regions), comment commands (`M-;`), and compilation mode
+
+=== Demo
+
+The highlighting emphasizes how the output will look. _All_
+characters are visible, however meta characters are displayed in a
+faint way.  An exception are image links.  You can toggle between
+the display of the link text and the linked image.
+
+image::images/adoc-mode.png[alt=screenshot]
+
+== See Also
+
+If you're looking for a lighter-weight alternative, check out https://github.com/bbatsov/asciidoc-mode[asciidoc-mode] -- a tree-sitter-based AsciiDoc mode focused on the essentials (highlighting, navigation, folding). It requires Emacs 30.1+ and trades `adoc-mode`'s richer feature set for simplicity and the performance benefits of tree-sitter. Both modes are maintained by the same author.
+
+== Installation
+
+`adoc-mode` is available on link:{nongnu-elpa-package}[NonGNU ELPA] (Emacs 28+),
+link:{melpa-stable-package}[MELPA Stable] and link:{melpa-package}[MELPA].
+
+NonGNU ELPA is enabled by default in Emacs 28+, so `adoc-mode` can be installed
+without any additional package archive configuration. MELPA Stable carries
+the latest stable version, while MELPA has a development snapshot for users
+who don't mind breakage but don't want to run `adoc-mode` from a git checkout.
+
+You can install `adoc-mode` using the following command:
+
+kbd:[M-x] `package-install` kbd:[RET] `adoc-mode` kbd:[RET]
+
+If the installation doesn't work try refreshing the package list:
+
+kbd:[M-x] `package-refresh-contents`
+
+Alternatively, you can add something like this to your Emacs config:
+
+[source,emacs-lisp]
+----
+(unless (package-installed-p 'adoc-mode)
+  (package-refresh-contents)
+  (package-install 'adoc-mode))
+----
+
+or if you're into `use-package`:
+
+[source,emacs-lisp]
+----
+(use-package adoc-mode
+  :ensure t)
+----
+
+== Usage
+
+Adoc-mode is designed for intuitive use. Most features are available
+from the _AsciiDoc_ menu in the menu bar.
+
+This section only describes some not so obvious features.
+
+=== Image Preview
+
+If you click kbd:[mouse-3] on an image link like
+`image⁣:path/to/image[]` the _Image_ context menu pops up.
+
+This context menu allows you to generate or remove the preview for
+the linked image.
+
+The menu item _AsciiDoc → Toggle display of images_ runs the command
+`adoc-toggle-images`. It removes all image previews from the buffer
+if there are any. If there are no image previews in the buffer it
+generates them for all image links.
+
+This may be confusing if all image previews are outside the visible
+region of the buffer. In this case, you might expect `adoc-toggle-images`
+to generate the previews for the image links in the visible area on
+the first run. But it does not, since it first removes all the
+previews, even if you have not seen them.
+
+Just run `adoc-toggle-images` again if it does not do what you expect on
+the first run.
+
+== Configuration
+
+=== General
+
+The `.adoc` and `.asciidoc` file extensions are associated with `adoc-mode` automatically.
+
+NOTE: An old AsciiDoc manual lists `.txt` as the standard extension. If you want `adoc-mode` for `.txt` files as well, add this to your init file:
+
+[source,emacs-lisp]
+----
+(add-to-list 'auto-mode-alist (cons "\\.txt\\'" 'adoc-mode))
+----
+
+You can see a list of all configuration options offered by `adoc-mode` by running the following command - kbd:[M-x] `customize-group adoc`.
+
+=== Native Syntax Highlighting of Source Code Blocks
+
+Out-of-the-box `adoc-mode` will try to apply native font-locking to source code blocks (e.g. the same font-locking that `ruby-mode` would use for Ruby code blocks).
+This can be tweaked by several configuration options:
+
+* Native fontification of source blocks can be switched off by setting `adoc-fontify-code-blocks-natively` to `nil`. The default value is `5000`, meaning only code blocks of 5000 characters or fewer are fontified natively.
+* Native fontification of lengthy code blocks can cause performance problems. If the value of `adoc-fontify-code-blocks-natively` is an integer only those code blocks are fontified natively whose length is less or equal to that value. Set it to `t` to fontify all code blocks regardless of size.
+* To avoid performance problems with code block beginnings that do not have a matching end yet the scanning for the code block end is delimited by `adoc-font-lock-extend-after-change-max`.
+* All programming languages `XYZ` that have an Emacs major mode `XYZ-mode` and use `font-lock` are automatically supported. Some other languages not fitting into that name scheme are supported through the alist `adoc-code-lang-modes`. You can add your own languages and modes there if they work based on `font-lock` and are not automatically supported.
+* The fall-back language mode is `prog-mode` without any fontification. You can set your own default by `adoc-fontify-code-block-default-mode`.
+
+=== Display of Image Previews
+
+Images are shown as preview by default when you open an AsciiDoc file.
+You can avoid this by deactivating the option `adoc-display-images`.
+
+[source,emacs-lisp]
+----
+(setq adoc-display-images nil)
+----
+
+By default, images are displayed at their actual size. You can limit the maximum dimensions by setting `adoc-max-image-size` to a cons cell of `(MAX-WIDTH . MAX-HEIGHT)` in pixels:
+
+[source,emacs-lisp]
+----
+(setq adoc-max-image-size '(640 . 480))
+----
+
+NOTE: Image resizing requires Emacs to be built with ImageMagick support.
+
+An image link can also be given as url to a remote image. The display of remote images is switched off by default. You can activate it by the option `adoc-display-remote-images`.
+
+[source,emacs-lisp]
+----
+(setq adoc-display-remote-images t)
+----
+
+Images are only downloaded if the protocol of the url matches one of those in the list `adoc-remote-image-protocols`. This list can be customized. By default, it only contains the entry `https`.
+
+=== Syntax Highlighting Customization
+
+It is possible to customize the way `adoc-mode` renders different text
+elements (faces) like section titles, text or punctuation styles. For
+example, if you would like a level 1 section title to have a different
+text color or height you can achieve this by using standard Emacs
+functionality.
+
+First of all, list all available faces by running
+
+kbd:[M-x] `list-faces-display`
+
+and searching for lines with the `adoc-` prefix.
+
+Alternatively, you can get information about the face under point by calling
+
+kbd:[M-x] `describe-face`
+
+One possible solution to change the look of a face is to use the
+built-in `use-package` feature `:custom-face`.
+
+Example:
+
+[source,emacs-lisp]
+----
+(use-package adoc-mode
+  :ensure t
+  :custom-face
+  (adoc-title-0-face ((t (:height 1.0 :weight bold)))))
+----
+
+Of course, this is only one way to do it. Emacs has a few ways to
+customize faces. Simply, pick the one you prefer.
+
+If your default face is a fixed pitch (monospace) face, but in AsciiDoc files
+you'd like to have normal text with a variable pitch face, `variable-pitch-mode`
+is a good option:
+
+[source,emacs-lisp]
+----
+(add-hook 'adoc-mode-hook #'variable-pitch-mode)
+----
+
+== History
+
+`adoc-mode` was created by https://github.com/sensorflo/[Florian Kaufmann] in 2009. Eventually the development
+was halted in 2016 and the mode was dormant for the next 6 years. In 2022
+https://github.com/TobiasZawada[Tobias Zawada] encouraged the Emacs community to revive the development and after a brief period under the https://github.com/emacsorphanage[Emacs Orphanage] org, https://github.com/bbatsov/[Bozhidar Batsov] assumed the project's maintenance.
+
+These days all upstream packages (e.g. on MELPA) are built from Bozhidar's fork.
+
+== Roadmap
+
+Here are some features that we're considering to add in the future:
+
+- Demote / promote for list items
+- Correctly highlighting backslash escapes
+
+Check out the issue tracker for more details.
+
+== Hacking
+
+adoc-mode uses https://github.com/doublep/eldev[Eldev] for development, so
+you should install the tool first.
+
+The easiest and "purest" way to run adoc-mode is to execute:
+
+    $ eldev emacs
+
+This will start a separate Emacs process with adoc-mode and its
+dependencies available, but _without_ your normal packages installed.
+However, you can use `Eldev-local` to add some packages with
+`(eldev-add-extra-dependencies 'emacs ...)` forms.  See Eldev
+documentation for details.
+
+Alternatively, if you want to load adoc-mode from source code in the Emacs
+you use for editing:
+
+- Generate autoloads file (that's done automatically when installing
+via `package.el` but you'll have to do it manually in this case):
+
+[source,shellsession]
+----
+$ eldev build :autoloads
+----
+
+- Add to your `.emacs`:
+
+[source,emacs-lisp]
+----
+;; load adoc-mode from its source code
+(add-to-list 'load-path "~/projects/adoc-mode")
+(load "adoc-mode-autoloads" t t)
+----
+
+=== Changing the code
+
+It's perfectly fine to load adoc-mode from `package.el` and then to start making
+experiments by changing existing code and adding new code.
+
+A very good workflow is to just open the source code you've cloned and start
+evaluating the code you've altered/added with commands like `C-M-x`,
+`eval-buffer` and so on.
+
+Once you've evaluated the new code, you can invoke some interactive command that
+uses it internally or open an Emacs Lisp REPL and experiment with it there. You
+can open an Emacs Lisp REPL with `M-x ielm`.
+
+You can also quickly evaluate some Emacs Lisp code in the minibuffer with `M-:`.
+
+=== Running the tests
+
+Run all tests with:
+
+[source,shellsession]
+----
+$ eldev test
+----
+
+NOTE: Tests may not run correctly inside Emacs' `shell-mode` buffers. Running
+them in a terminal is recommended.
+
+You can also check for compliance with a variety of coding standards in batch mode (including docstrings):
+
+[source,shellsession]
+----
+$ eldev lint
+----
+
+To check for byte-compilation warnings you can just compile the project with Eldev:
+
+[source,shellsession]
+----
+$ eldev compile
+----
+
+== License
+
+Copyright © 2009-2016 Florian Kaufmann
+
+Copyright © 2022-2026 Bozhidar Batsov and `adoc-mode` contributors
+
+Distributed under the link:{copying}[GNU General Public License]; type kbd:[C-h] kbd:[C-c] to view it.

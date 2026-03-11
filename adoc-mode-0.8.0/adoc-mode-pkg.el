@@ -1,0 +1,2 @@
+;; Generated package description from adoc-mode.el  -*- mode: lisp-data; no-byte-compile: t; lexical-binding:t -*-
+(define-package "adoc-mode" "0.8.0" "a major-mode for editing AsciiDoc files" '((emacs "28.1")) :commit "6fc5ebc9478de17b1971222485e7729f04fbcf57" :authors '(("Florian Kaufmann" . "sensorflo@gmail.com")) :maintainer '("Bozhidar Batsov" . "bozhidar@batsov.dev") :keywords '("asciidoc" "text") :url "https://github.com/bbatsov/adoc-mode")
